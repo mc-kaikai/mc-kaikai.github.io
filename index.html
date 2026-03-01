@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的 GitHub 网站</title>
-    <!-- 添加 Turnstile 脚本 -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,47 +15,10 @@
         h1 {
             color: #333;
         }
-        .cf-turnstile {
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
     <h1>🎉 欢迎来到我的网站！</h1>
     <p>这是我的 GitHub Pages 网站，创建于 2026年2月28日。</p>
-    
-    <!-- 示例：带验证码的按钮 -->
-    <h2>验证一下</h2>
-    
-    <!-- Turnstile 验证码容器（用你的 Site Key） -->
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAACkI4dvwo8IRByr4"></div>
-    
-    <button onclick="verifyAndSubmit()">提交</button>
-    
-    <script>
-        function verifyAndSubmit() {
-            // 获取 Turnstile 生成的 token
-            const token = document.querySelector('[name="cf-turnstile-response"]')?.value;
-            
-            if (token) {
-                alert('✅ 验证成功！Token: ' + token.substring(0, 20) + '...');
-                console.log('完整 token:', token);
-                // 这里可以把 token 发送给某个 API 做验证
-            } else {
-                alert('❌ 请先完成人机验证');
-            }
-        }
-    </script>
 </body>
 </html>
