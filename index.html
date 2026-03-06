@@ -326,12 +326,124 @@
             z-index: 2;
         }
 
+        /* 状态面板 - 包含状态显示和刷新按钮 */
+        .status-panel {
+            background: rgba(0, 10, 12, 0.7);
+            border-radius: 3rem;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0 1.5rem;
+            border: 1px solid #388072;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6b6f78;
+            box-shadow: 0 0 8px currentColor;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot.online {
+            background: #3af07d;
+            box-shadow: 0 0 15px #1df05a;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #f05a5a;
+            box-shadow: 0 0 15px #f05a5a;
+        }
+
+        .status-dot.checking {
+            background: #f0c45a;
+            box-shadow: 0 0 15px #f0b05a;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .status-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .status-detail {
+            color: #a0c7bc;
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.05);
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            border: 1px solid #397a6b40;
+        }
+
+        .refresh-btn {
+            background: #1f423b;
+            border: 1px solid #4dac94;
+            color: #d0f3e4;
+            font-size: 1rem;
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn:hover {
+            background: #2d685b;
+            border-color: #7fffd4;
+            transform: scale(0.98);
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.95);
+        }
+
+        .refresh-icon {
+            font-size: 1.2rem;
+            transition: transform 0.5s;
+        }
+
+        .refresh-btn.loading .refresh-icon {
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* 加入面板 */
         .join-panel {
             background: rgba(0, 10, 12, 0.7);
             border-radius: 3rem;
             padding: 1.8rem 2.5rem;
-            margin-top: 2rem;
+            margin-top: 1rem;
             border: 1px solid #388072;
             display: flex;
             flex-wrap: wrap;
@@ -407,6 +519,8 @@
             .server-card { padding: 1.5rem; }
             .minecraft-title { font-size: 2.2rem; }
             .server-ip { font-size: 1.6rem; padding: 0.7rem 1rem; flex-wrap: wrap; justify-content: center; }
+            .status-panel { flex-direction: column; gap: 1rem; align-items: stretch; }
+            .status-container { justify-content: center; }
             .join-panel { flex-direction: column; gap: 1.5rem; align-items: stretch; text-align: center; }
             .ip-copy-block { justify-content: space-between; }
             .ip-copy-block .ip { font-size: 1.3rem; }
@@ -416,11 +530,6 @@
         @media (max-width: 450px) {
             .ip-copy-block { flex-wrap: wrap; justify-content: center; padding: 0.8rem; gap: 0.6rem; }
             .ip-copy-block .ip { font-size: 1.3rem; margin-right: 0; }
-        }
-
-        /* 磨砂高光 */
-        .glow-text {
-            text-shadow: 0 0 8px #7df5d9;
         }
 
         /* 右下角水印 */
@@ -440,6 +549,14 @@
             pointer-events: none;
             font-weight: 400;
             box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        /* 延迟提示 */
+        .delay-note {
+            font-size: 0.8rem;
+            color: #8a9e97;
+            margin-left: 0.5rem;
+            font-style: italic;
         }
     </style>
 </head>
@@ -464,6 +581,23 @@
             <span class="hammer">🛠️</span>
             <span>领地 · /tpa · /home · /back · 原版生存 1.21.x</span>
             <span class="hammer">🌍</span>
+        </div>
+
+        <!-- 服务器状态检测区域 (固定显示格式) -->
+        <div class="status-panel">
+            <div class="status-container">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span class="status-text" id="statusText">检测中...</span>
+                </div>
+                <div class="status-detail" id="statusDetail">
+                    <span id="serverInfo">Minecraft 服务器 · 0/50 人在线</span>
+                    <span class="delay-note">测量结果可能有延迟</span>
+                </div>
+            </div>
+            <button class="refresh-btn" id="refreshBtn">
+                <span class="refresh-icon">⟳</span> 刷新状态
+            </button>
         </div>
 
         <!-- 特性网格 -->
@@ -506,7 +640,7 @@
             </div>
         </div>
 
-        <!-- 加入面板 - 按钮文字改为"一键复制" -->
+        <!-- 加入面板 -->
         <div class="join-panel">
             <div class="ip-copy-block" id="ip-copy-block">
                 <span class="ip" id="server-ip-display">mc.kaikai.cc.cd</span>
@@ -528,26 +662,34 @@
         </div>
     </div>
 
-    <!-- 自动复制功能 - 无需手动选择 -->
+    <!-- 自动复制功能 + 服务器状态检测 (固定显示格式) -->
     <script>
+        // 服务器信息
+        const SERVER_IP = 'mc.kaikai.cc.cd';
+        const SERVER_PORT = 25565; // 默认MC端口
+        const MAX_PLAYERS = 50; // 最大玩家数
+        
+        // DOM 元素
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const serverInfoSpan = document.getElementById('serverInfo');
+        const refreshBtn = document.getElementById('refreshBtn');
+
+        // 复制功能
         document.getElementById('copy-ip-btn').addEventListener('click', function() {
-            const ipText = "mc.kaikai.cc.cd";
+            const ipText = SERVER_IP;
             
-            // 现代浏览器 clipboard API
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(ipText).then(() => {
                     showCopySuccess();
                 }).catch(err => {
-                    // 如果clipboard失败，使用备用方法
                     fallbackCopy(ipText);
                 });
             } else {
-                // 备用复制方法
                 fallbackCopy(ipText);
             }
         });
 
-        // 备用复制方法 (针对不支持clipboard API的浏览器)
         function fallbackCopy(text) {
             const textarea = document.createElement('textarea');
             textarea.value = text;
@@ -567,12 +709,9 @@
             document.body.removeChild(textarea);
         }
 
-        // 显示复制成功提示
         function showCopySuccess() {
             const btn = document.getElementById('copy-ip-btn');
             const originalText = btn.innerText;
-            const originalBg = btn.style.background;
-            
             btn.innerText = '✅ 复制成功!';
             btn.style.background = '#258a6e';
             
@@ -581,6 +720,58 @@
                 btn.style.background = '#2f6a5e';
             }, 1600);
         }
+
+        // ========== 服务器状态检测功能 (固定显示格式) ==========
+        async function checkServerStatus() {
+            // 设置为检测中状态
+            statusDot.className = 'status-dot checking';
+            statusText.textContent = '检测中...';
+            serverInfoSpan.textContent = 'Minecraft 服务器 · 0/50 人在线';
+            refreshBtn.classList.add('loading');
+            
+            try {
+                // 使用 mcapi.us 免费API
+                const response = await fetch(`https://mcapi.us/server/status?ip=${SERVER_IP}&port=${SERVER_PORT}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.online) {
+                    // 服务器在线
+                    statusDot.className = 'status-dot online';
+                    statusText.textContent = '服务器在线';
+                    
+                    // 获取玩家数量
+                    const currentPlayers = data.players ? data.players.now : 0;
+                    serverInfoSpan.textContent = `Minecraft 服务器 · ${currentPlayers}/${MAX_PLAYERS} 人在线`;
+                } else {
+                    // 服务器离线
+                    statusDot.className = 'status-dot offline';
+                    statusText.textContent = '服务器离线';
+                    serverInfoSpan.textContent = 'Minecraft 服务器 · 0/50 人在线';
+                }
+            } catch (error) {
+                console.error('检测失败:', error);
+                statusDot.className = 'status-dot offline';
+                statusText.textContent = '检测失败';
+                serverInfoSpan.textContent = 'Minecraft 服务器 · 0/50 人在线';
+            } finally {
+                refreshBtn.classList.remove('loading');
+            }
+        }
+
+        // 刷新按钮点击事件
+        refreshBtn.addEventListener('click', function() {
+            checkServerStatus();
+        });
+
+        // 页面加载时自动检测一次
+        window.addEventListener('load', function() {
+            checkServerStatus();
+        });
     </script>
 </body>
 </html>
