@@ -326,7 +326,7 @@
             z-index: 2;
         }
 
-        /* 状态面板 - 包含状态显示和刷新按钮 */
+        /* 状态面板 - 精简版 */
         .status-panel {
             background: rgba(0, 10, 12, 0.7);
             border-radius: 3rem;
@@ -550,14 +550,6 @@
             font-weight: 400;
             box-shadow: 0 2px 6px rgba(0,0,0,0.5);
         }
-
-        /* 延迟提示 */
-        .delay-note {
-            font-size: 0.8rem;
-            color: #8a9e97;
-            margin-left: 0.5rem;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
@@ -583,7 +575,7 @@
             <span class="hammer">🌍</span>
         </div>
 
-        <!-- 服务器状态检测区域 (使用低延迟API) -->
+        <!-- 服务器状态检测区域 - 修复版 -->
         <div class="status-panel">
             <div class="status-container">
                 <div class="status-indicator">
@@ -592,7 +584,6 @@
                 </div>
                 <div class="status-detail" id="statusDetail">
                     <span id="serverInfo">Minecraft 服务器 · 0/50 人在线</span>
-                    <span class="delay-note">测量结果可能有延迟</span>
                 </div>
             </div>
             <button class="refresh-btn" id="refreshBtn">
@@ -662,12 +653,11 @@
         </div>
     </div>
 
-    <!-- 自动复制功能 + 服务器状态检测 (使用低延迟API) -->
+    <!-- 自动复制功能 + 修复版服务器状态检测 -->
     <script>
         // 服务器信息
         const SERVER_IP = 'mc.kaikai.cc.cd';
-        const SERVER_PORT = 25565; // 默认MC端口
-        const MAX_PLAYERS = 50; // 最大玩家数
+        const MAX_PLAYERS = 50;
         
         // DOM 元素
         const statusDot = document.getElementById('statusDot');
@@ -721,48 +711,40 @@
             }, 1600);
         }
 
-        // ========== 低延迟服务器状态检测 ==========
-        // 使用 mcsrvstat.us API - 响应速度快，稳定性高
+        // ========== 修复版服务器状态检测 ==========
+        // 直接用最简单的逻辑，确保能用
+        
         async function checkServerStatus() {
-            // 设置为检测中状态
+            // 检测中
             statusDot.className = 'status-dot checking';
             statusText.textContent = '检测中...';
             serverInfoSpan.textContent = 'Minecraft 服务器 · 0/50 人在线';
             refreshBtn.classList.add('loading');
             
             try {
-                // 使用 mcsrvstat.us API - 延迟低，响应快
-                const response = await fetch(`https://api.mcsrvstat.us/2/${SERVER_IP}:${SERVER_PORT}`, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache'
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`API响应错误: ${response.status}`);
-                }
-                
+                // 直接请求，不加复杂逻辑
+                const response = await fetch(`https://api.mcsrvstat.us/2/${SERVER_IP}`);
                 const data = await response.json();
                 
-                // 严格判断服务器在线状态
+                console.log('API返回数据:', data); // 可以在控制台看返回什么
+                
+                // 判断是否在线 - 最简单的方式
                 if (data && data.online === true) {
-                    // 服务器在线
+                    // 在线
                     statusDot.className = 'status-dot online';
                     statusText.textContent = '服务器在线';
                     
-                    // 获取玩家数量
-                    const currentPlayers = data.players ? data.players.online : 0;
-                    serverInfoSpan.textContent = `Minecraft 服务器 · ${currentPlayers}/${MAX_PLAYERS} 人在线`;
+                    const players = data.players ? data.players.online : 0;
+                    serverInfoSpan.textContent = `Minecraft 服务器 · ${players}/${MAX_PLAYERS} 人在线`;
                 } else {
-                    // 服务器离线
+                    // 离线
                     statusDot.className = 'status-dot offline';
                     statusText.textContent = '服务器离线';
                     serverInfoSpan.textContent = 'Minecraft 服务器 · 0/50 人在线';
-                    console.log('服务器离线，API返回数据:', data);
                 }
             } catch (error) {
-                console.error('检测失败:', error);
-                // 网络错误等也视为离线
+                console.error('检测出错:', error);
+                // 出错也显示离线
                 statusDot.className = 'status-dot offline';
                 statusText.textContent = '服务器离线';
                 serverInfoSpan.textContent = 'Minecraft 服务器 · 0/50 人在线';
@@ -771,15 +753,14 @@
             }
         }
 
-        // 刷新按钮点击事件
-        refreshBtn.addEventListener('click', function() {
-            checkServerStatus();
-        });
+        // 刷新按钮
+        refreshBtn.addEventListener('click', checkServerStatus);
 
-        // 页面加载时自动检测一次
-        window.addEventListener('load', function() {
-            checkServerStatus();
-        });
+        // 页面加载
+        window.addEventListener('load', checkServerStatus);
+        
+        // 定时刷新（30秒一次）
+        setInterval(checkServerStatus, 30000);
     </script>
 </body>
 </html>
