@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>纯生存 1.21.x | 我的世界Java服务器</title>
+    <title>纯生存 26.1.2 | 我的世界Java服务器</title>
     <!-- 自动升级混合内容 -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -546,7 +546,7 @@
 
     <div class="server-card pixel-dots">
         <div class="hero">
-            <div class="version-badge">⚡ Java版 1.21.x 便捷生存 ⚡</div>
+            <div class="version-badge">⚡ Java版 26.1.2 便捷生存 ⚡</div>
             <h1 class="minecraft-title">插件生存</h1>
             <div class="server-ip" id="server-ip-display">
                 mc.mcjava.cc
@@ -557,10 +557,11 @@
 
         <div class="pure-survival">
             <span class="hammer">🛠️</span>
-            <span>领地 · /tpa · /home · /back · 原版生存 1.21.x</span>
+            <span>领地 · /tpa · /home · /back · 原版生存 26.1.2</span>
             <span class="hammer">🌍</span>
         </div>
 
+        <!-- 服务器状态查询 -->
         <div class="status-panel">
             <div class="status-container">
                 <div class="status-indicator">
@@ -594,8 +595,8 @@
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🧪</div>
-                <h3>1.21.x 最新</h3>
-                <p>铜系列 · 风弹 · 试炼大厅 · 第一时间体验</p>
+                <h3>26.1.2 最新</h3>
+                <p>新结构 · 新遗迹 · 新挑战 · 第一时间体验</p>
             </div>
         </div>
 
@@ -628,7 +629,7 @@
         <hr>
 
         <div class="footer-note">
-            <span>⏵ 兼容版本: 1.21.x (1.21 - 1.21.11) · 离线玩家可进</span>
+            <span>⏵ 兼容版本: 26.1.2 · 离线玩家可进</span>
             <span>⏴ 社区服务器  ·  和谐生存</span>
         </div>
     </div>
@@ -702,7 +703,7 @@
 
         refreshBtn.addEventListener('click', checkServerStatus);
         window.addEventListener('load', checkServerStatus);
-        setInterval(checkServerStatus, 5000); // 每10秒刷新一次，因为是你自己的API，可以更频繁
+        setInterval(checkServerStatus, 10000); // 每10秒刷新一次
     </script>
 </body>
 </html>
