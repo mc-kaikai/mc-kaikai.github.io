@@ -688,14 +688,14 @@
                     // 离线
                     statusDot.className = 'status-dot offline';
                     statusText.textContent = '服务器离线';
-                    serverInfoSpan.textContent = 'Minecraft 服务器 · 暂时无法连接';
+                    serverInfoSpan.textContent = 'Minecraft 服务器(状态查询暂不可用) · 暂时无法连接';
                 }
             } catch (error) {
                 console.error('状态查询失败:', error);
                 // 网络错误也视为离线
                 statusDot.className = 'status-dot offline';
                 statusText.textContent = '服务器离线';
-                serverInfoSpan.textContent = 'Minecraft 服务器 · 连接失败';
+                serverInfoSpan.textContent = 'Minecraft 服务器(状态查询暂不可用) · 连接失败';
             } finally {
                 refreshBtn.classList.remove('loading');
             }
