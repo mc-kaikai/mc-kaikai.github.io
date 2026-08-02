@@ -214,17 +214,9 @@
 
     <script>
         // 云函数数据接口
-        const ACCOUNTS_JSON_URL = "https://sync.mcjava.cc/verify";
+        const VERIFY_URL = "https://sync.mcjava.cc/verify";
 
-        // SHA-256 哈希函数
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // 处理登录
+        // 处理登录（直接发明文密码，由云函数做加盐比对）
         async function handleLogin() {
             const name = document.getElementById('login-name').value.trim();
             const pwd = document.getElementById('login-pwd').value.trim();
@@ -237,15 +229,11 @@
 
             resultBox.innerHTML = '<span style="color: #8db5aa;">验证中...</span>';
 
-            // 计算哈希
-            const inputHash = await sha256(pwd);
-
-            // 发送到云函数验证
             try {
-                const res = await fetch(ACCOUNTS_JSON_URL, {
+                const res = await fetch(VERIFY_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: name, password: inputHash })
+                    body: JSON.stringify({ name: name, password: pwd })
                 });
                 const data = await res.json();
 
