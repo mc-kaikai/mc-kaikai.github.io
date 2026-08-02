@@ -188,7 +188,6 @@
         <h1>登录账号</h1>
         <p class="subtitle">使用你在 Minecraft 服务器注册的账号密码</p>
 
-        <!-- 登录表单 -->
         <div id="login-form">
             <div class="form-group">
                 <label>玩家名称</label>
@@ -202,7 +201,6 @@
             <div id="login-result" class="login-result"></div>
         </div>
 
-        <!-- 登录成功 -->
         <div id="success-box" class="success-box">
             <h2>登录成功</h2>
             <p>欢迎回来，<span id="welcome-name" style="color: #f0f9d0; font-weight: bold;"></span></p>
@@ -213,10 +211,15 @@
     </div>
 
     <script>
-        // 云函数数据接口
-        const VERIFY_URL = "https://sync.mcjava.cc/verify";
+        const GET_HASH_URL = "https://sync.mcjava.cc/get_hash";
 
-        // 处理登录（直接发明文密码，由云函数做加盐比对）
+        async function sha256WithSalt(salt, password) {
+            const msgBuffer = new TextEncoder().encode(salt + password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         async function handleLogin() {
             const name = document.getElementById('login-name').value.trim();
             const pwd = document.getElementById('login-pwd').value.trim();
@@ -230,14 +233,21 @@
             resultBox.innerHTML = '<span style="color: #8db5aa;">验证中...</span>';
 
             try {
-                const res = await fetch(VERIFY_URL, {
+                const res = await fetch(GET_HASH_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: name, password: pwd })
+                    body: JSON.stringify({ name: name })
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if (!data.salt || !data.hash) {
+                    resultBox.innerHTML = '<span style="color: #ff7b72;">玩家不存在</span>';
+                    return;
+                }
+
+                const calculatedHash = await sha256WithSalt(data.salt, pwd);
+
+                if (calculatedHash === data.hash) {
                     document.getElementById('login-form').style.display = 'none';
                     document.getElementById('success-box').style.display = 'block';
                     document.getElementById('welcome-name').innerText = name;
@@ -249,7 +259,6 @@
             }
         }
 
-        // 登出
         function handleLogout() {
             document.getElementById('login-form').style.display = 'block';
             document.getElementById('success-box').style.display = 'none';
